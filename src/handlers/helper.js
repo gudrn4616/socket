@@ -3,6 +3,7 @@ import { CLIENT_VERSION } from '../constants.js';
 import handlerMappings from './handlerMapping.js';
 import { createStage } from '../models/stage.model.js';
 
+
 export const handleConnection = (socket, userUUID) => {
   console.log(`New user connected: ${userUUID} with socket ID ${socket.id}`);
   console.log('Current users:', getUsers());
@@ -36,6 +37,5 @@ export const handleEvent = (io, socket, data) => {
     io.emit('response', 'broadcast');
     return;
   }
-  console.log(response)
   socket.emit('response', response);
 };

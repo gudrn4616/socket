@@ -8,7 +8,7 @@ const socket = io('http://localhost:3000', {
 
 let userId = null;
 socket.on('response', (data) => {
-  console.log(data);
+  console.log(data)
 });
 
 socket.on('connection', (data) => {
@@ -17,25 +17,19 @@ socket.on('connection', (data) => {
 });
 
 const sendEvent = (handlerId, payload) => {
-  socket.emit('event', {
-    userId,
-    clientVersion: CLIENT_VERSION,
-    handlerId,
-    payload,
-  });
-};
-
-const getItemScore = (itemId) => {
   return new Promise((resolve, reject) => {
-    // 서버로 'getItemScore' 이벤트와 함께 itemId를 전송
-    socket.emit('getItemScore', { itemId });
-
-    // 'itemScore' 이벤트를 한 번만 수신하고 결과를 resolve로 반환
-    socket.once('itemScore', (response) => {
+    // 이벤트를 서버로 전송
+    socket.emit('event', {
+      userId, // 사용자 ID
+      clientVersion: CLIENT_VERSION, // 클라이언트 버전
+      handlerId, // 핸들러 ID
+      payload, // 추가 데이터
+    });
+    // 서버로부터 응답을 받으면 Promise를 해결
+    socket.on('response', (response) => {
       resolve(response);
     });
-
-  });
+  })
 };
 
-export { sendEvent, getItemScore };
+export { sendEvent};

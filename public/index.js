@@ -3,7 +3,7 @@ import Ground from './Ground.js';
 import CactiController from './CactiController.js';
 import Score from './Score.js';
 import ItemController from './ItemController.js';
-import {sendEvent, getItemScore} from './Socket.js';
+import {sendEvent} from './Socket.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -55,7 +55,9 @@ let gameSpeed = GAME_SPEED_START;
 let gameover = false;
 let hasAddedEventListenersForRestart = false;
 let waitingToStart = true;
+let currentStage = 1;
 
+// 스프라이트 생성 함수
 function createSprites() {
   // 비율에 맞는 크기
   // 유저
@@ -107,6 +109,7 @@ function createSprites() {
   score = new Score(ctx, scaleRatio);
 }
 
+// 스케일 비율 계산 함수
 function getScaleRatio() {
   const screenHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
   const screenWidth = Math.min(window.innerHeight, document.documentElement.clientWidth);
@@ -119,6 +122,7 @@ function getScaleRatio() {
   }
 }
 
+// 화면 설정 함수
 function setScreen() {
   scaleRatio = getScaleRatio();
   canvas.width = GAME_WIDTH * scaleRatio;
@@ -133,6 +137,7 @@ if (screen.orientation) {
   screen.orientation.addEventListener('change', setScreen);
 }
 
+// 게임 오버 텍스트 표시 함수
 function showGameOver() {
   const fontSize = 70 * scaleRatio;
   ctx.font = `${fontSize}px Verdana`;
@@ -142,6 +147,7 @@ function showGameOver() {
   ctx.fillText('GAME OVER', x, y);
 }
 
+// 게임 시작 텍스트 표시 함수
 function showStartGameText() {
   const fontSize = 40 * scaleRatio;
   ctx.font = `${fontSize}px Verdana`;
@@ -151,14 +157,17 @@ function showStartGameText() {
   ctx.fillText('Tap Screen or Press Space To Start', x, y);
 }
 
+// 게임 속도 업데이트 함수
 function updateGameSpeed(deltaTime) {
   gameSpeed += deltaTime * GAME_SPEED_INCREMENT;
 }
 
+// 게임 리셋 함수
 function reset() {
   hasAddedEventListenersForRestart = false;
   gameover = false;
   waitingToStart = false;
+  currentStage = 1;
 
   ground.reset();
   cactiController.reset();
@@ -167,6 +176,7 @@ function reset() {
   sendEvent(2, { timestamp: Date.now() });
 }
 
+// 게임 리셋 설정 함수
 function setupGameReset() {
   if (!hasAddedEventListenersForRestart) {
     hasAddedEventListenersForRestart = true;
@@ -177,11 +187,24 @@ function setupGameReset() {
   }
 }
 
+// 화면 지우기 함수
 function clearScreen() {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+// 스테이지 업데이트 함수
+function updateStage() {
+  if (score.getCurrentScore() >= 100 && currentStage === 1) {
+    currentStage = 2;
+    gameSpeed += 0.5;
+  } else if (score.getCurrentScore() >= 200 && currentStage === 2) {
+    currentStage = 3;
+    gameSpeed += 0.5;
+  }
+}
+
+// 게임 루프 함수
 function gameLoop(currentTime) {
   if (previousTime === null) {
     previousTime = currentTime;
@@ -206,6 +229,7 @@ function gameLoop(currentTime) {
     // 달리기
     player.update(gameSpeed, deltaTime);
     updateGameSpeed(deltaTime);
+    updateStage();
 
     score.update(deltaTime);
   }
@@ -218,14 +242,10 @@ function gameLoop(currentTime) {
 
   const collideWithItem = itemController.collideWith(player);
   if (collideWithItem && collideWithItem.itemId) {
-    getItemScore(collideWithItem.itemId).then(itemScoreResponse => {
-      if (itemScoreResponse.status === 'success') {
-        score.getItem(itemScoreResponse.score);
-      } else {
-        console.error(itemScoreResponse.message);
-      }
+    sendEvent(21, { itemId: collideWithItem.itemId }).then(item => {
+      score.getItem(item.score);
     }).catch(error => {
-      console.error('Error fetching item score:', error);
+      console.error('Error sending event:', error);
     });
   }
 

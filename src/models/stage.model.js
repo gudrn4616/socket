@@ -5,6 +5,7 @@ export const createStage = (uuid) => {
 };
 
 export const getStage = (uuid) => {
+  console.log(stages[uuid])
   return stages[uuid];
 };
 

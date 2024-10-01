@@ -1,6 +1,9 @@
+import { sendEvent } from './Socket.js';
+
 class Score {
   score = 0;
   HIGH_SCORE_KEY = 'highScore';
+  stageChange = true;
 
   constructor(ctx, scaleRatio) {
     this.ctx = ctx;
@@ -9,11 +12,20 @@ class Score {
   }
 
   update(deltaTime) {
-    this.score += deltaTime * 0.001;
+    // deltaTime을 이용하여 점수를 증가시킴
+    this.score += deltaTime * 0.01;
+    
+    // 점수가 100에 도달하고 stageChange가 true일 때
+    if (Math.floor(this.score) === 100 && this.stageChange) {
+      // stageChange를 false로 설정
+      this.stageChange = false;
+      // 이벤트를 전송하여 스테이지 변경을 알림
+      sendEvent(11, { currentStage: 1000, targetStage: 1001 });
+    }
   }
 
-  getItem(itemscore) {
-    this.score += itemscore;
+  getItem(itemId) {
+    this.score += itemId;
   }
 
   reset() {
@@ -47,6 +59,10 @@ class Score {
 
     this.ctx.fillText(scorePadded, scoreX, y);
     this.ctx.fillText(`HI ${highScorePadded}`, highScoreX, y);
+  }
+
+  getCurrentScore() {
+    return Math.floor(this.score);
   }
 }
 
