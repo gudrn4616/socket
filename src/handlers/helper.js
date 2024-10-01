@@ -9,7 +9,7 @@ export const handleConnection = (socket, userUUID) => {
 
   // 스테이지 빈 배열 생성
   createStage(userUUID);
-
+  
   socket.emit('connection', { uuid: userUUID });
 };
 
@@ -36,5 +36,6 @@ export const handleEvent = (io, socket, data) => {
     io.emit('response', 'broadcast');
     return;
   }
+  console.log(response)
   socket.emit('response', response);
 };

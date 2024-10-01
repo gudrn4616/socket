@@ -12,8 +12,8 @@ class Score {
     this.score += deltaTime * 0.001;
   }
 
-  getItem(itemId) {
-    this.score += 0;
+  getItem(itemscore) {
+    this.score += itemscore;
   }
 
   reset() {

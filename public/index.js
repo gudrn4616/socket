@@ -3,7 +3,7 @@ import Ground from './Ground.js';
 import CactiController from './CactiController.js';
 import Score from './Score.js';
 import ItemController from './ItemController.js';
-import './Socket.js'
+import {sendEvent, getItemScore} from './Socket.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -164,6 +164,7 @@ function reset() {
   cactiController.reset();
   score.reset();
   gameSpeed = GAME_SPEED_START;
+  sendEvent(2, { timestamp: Date.now() });
 }
 
 function setupGameReset() {
@@ -214,9 +215,18 @@ function gameLoop(currentTime) {
     score.setHighScore();
     setupGameReset();
   }
+
   const collideWithItem = itemController.collideWith(player);
   if (collideWithItem && collideWithItem.itemId) {
-    score.getItem(collideWithItem.itemId);
+    getItemScore(collideWithItem.itemId).then(itemScoreResponse => {
+      if (itemScoreResponse.status === 'success') {
+        score.getItem(itemScoreResponse.score);
+      } else {
+        console.error(itemScoreResponse.message);
+      }
+    }).catch(error => {
+      console.error('Error fetching item score:', error);
+    });
   }
 
   // draw
