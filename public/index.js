@@ -228,11 +228,16 @@ function gameLoop(currentTime) {
     setupGameReset();
   }
 
+  // 플레이어와 아이템의 충돌을 확인
   const collideWithItem = itemController.collideWith(player);
+  // 충돌한 아이템이 있고, 아이템 ID가 존재할 경우
   if (collideWithItem && collideWithItem.itemId) {
+    // 아이템 점수 이벤트를 서버로 전송
     sendEvent(21, { itemId: collideWithItem.itemId , stageId : score.currentStageId }).then(item => {
+      // 서버로부터 받은 아이템 점수를 점수에 추가
       score.getItem(item.score);
     }).catch(error => {
+      // 이벤트 전송 중 에러 발생 시 콘솔에 에러 출력
       console.error('Error sending event:', error);
     });
   }
