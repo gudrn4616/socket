@@ -1,5 +1,6 @@
 import { getGameAssets } from "../init/assets.js";
 
+// 사용자 아이템을 저장하는 객체입니다.
 const userItems = {};
 
 // getItemScore 함수는 사용자 ID, 아이템 ID, 스테이지 ID를 받아서 아이템 점수를 반환합니다.
