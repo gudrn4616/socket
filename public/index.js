@@ -193,17 +193,6 @@ function clearScreen() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-// 스테이지 업데이트 함수
-function updateStage() {
-  if (score.getCurrentScore() >= 100 && currentStage === 1) {
-    currentStage = 2;
-    gameSpeed += 0.5;
-  } else if (score.getCurrentScore() >= 200 && currentStage === 2) {
-    currentStage = 3;
-    gameSpeed += 0.5;
-  }
-}
-
 // 게임 루프 함수
 function gameLoop(currentTime) {
   if (previousTime === null) {
@@ -225,11 +214,10 @@ function gameLoop(currentTime) {
     ground.update(gameSpeed, deltaTime);
     // 선인장
     cactiController.update(gameSpeed, deltaTime);
-    itemController.update(gameSpeed, deltaTime);
+    itemController.update(gameSpeed, deltaTime, score.CurrentStageId);
     // 달리기
     player.update(gameSpeed, deltaTime);
     updateGameSpeed(deltaTime);
-    updateStage();
 
     score.update(deltaTime);
   }
@@ -242,7 +230,7 @@ function gameLoop(currentTime) {
 
   const collideWithItem = itemController.collideWith(player);
   if (collideWithItem && collideWithItem.itemId) {
-    sendEvent(21, { itemId: collideWithItem.itemId }).then(item => {
+    sendEvent(21, { itemId: collideWithItem.itemId , stageId : score.currentStageId }).then(item => {
       score.getItem(item.score);
     }).catch(error => {
       console.error('Error sending event:', error);

@@ -15,8 +15,7 @@ socket.on('connection', (data) => {
   console.log('connection: ', data);
   userId = data.uuid;
 });
-
-const sendEvent = (handlerId, payload) => {
+const sendEvent = async (handlerId, payload) => {
   return new Promise((resolve, reject) => {
     // 이벤트를 서버로 전송
     socket.emit('event', {
@@ -29,7 +28,7 @@ const sendEvent = (handlerId, payload) => {
     socket.on('response', (response) => {
       resolve(response);
     });
-  })
+  });
 };
 
 export { sendEvent};
